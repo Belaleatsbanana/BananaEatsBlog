@@ -17,7 +17,7 @@ const imgSrc = ref<string>(defaultImage);
 const route = useRoute();
 const slug = ref<string>('');
 const blogPost = ref<PostDetail>();
-const userId = parseInt(localStorage.getItem('userId') as string, 10);
+const userId = parseInt(localStorage.getItem('userId') as string);
 const likeAnimation = ref<string | null>(null);
 const likeAction = ref<string | null>(null);
 const isBlogPoster = ref<boolean>();
@@ -199,6 +199,7 @@ const refreshComments = () => {
     <footer>
 
         <BlogComments v-if="blogPost" :comments="blogPost.comments" :postSlug="slug"
+        :poster-id="blogPost.user.id"
         @refresh-comments="refreshComments"/>
 
     </footer>

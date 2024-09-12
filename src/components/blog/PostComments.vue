@@ -1,24 +1,35 @@
 <script setup lang="ts">
 import { ref, defineProps, defineEmits } from 'vue';
 import CommentThread from './CommentThread.vue'; // Assuming CommentItem is a sibling component
-import type { Comment } from '@/types';
+import type { Comment, CreateComment } from '@/types';
+import { createComment } from '@/api/commentApi';
 
 const props = defineProps<{
     comments: Comment[];
     postSlug: string;
+    posterId: number;
 }>();
 
 const emits = defineEmits(['refresh-comments']);
-const newComment = ref('');
+
+const newComment = ref<CreateComment>({ content: '' , parent_id: null});
+const postingComment = ref(false);
 
 const addComment = () => {
-    if (newComment.value.trim()) {
+    postingComment.value = true;
+    if (newComment.value.content.trim()) {
 
-        // Make API call to add comment (pseudo-code)
-        // addCommentApi(newCommentObj).then(() => {
-        newComment.value = '';
-        emits('refresh-comments');
-        // });
+        createComment(props.postSlug, newComment.value).then(() => {
+            newComment.value.content = '';
+            emits('refresh-comments');
+
+        }).catch((error) => {
+            console.error('Error adding comment:', error);
+        }).finally(() => {
+            postingComment.value = false;
+        });
+        newComment.value.content = '';
+
     }
 };
 </script>
@@ -29,15 +40,14 @@ const addComment = () => {
 
         <!-- New Comment Form -->
         <div class="new-comment-form">
-            <textarea v-model="newComment" placeholder="Add a comment..." rows="3"></textarea>
-            <button @click="addComment" class="post-comment-button">Post Comment</button>
+            <textarea v-model="newComment.content" placeholder="Add a comment..." rows="3"></textarea>
+            <button @click="addComment" :disabled="postingComment" class="post-comment-button">Post Comment</button>
         </div>
 
         <!-- Existing Comments -->
         <div class="existing-comments">
             <CommentThread v-for="comment in props.comments" :key="comment.id" :comment="comment"
-                :postSlug="props.postSlug"
-                @refresh-comments="emits('refresh-comments')" />
+                :postSlug="props.postSlug" :posterId="props.posterId" @refresh-comments="emits('refresh-comments')" />
         </div>
     </div>
 </template>
@@ -99,6 +109,11 @@ textarea:focus {
 
 .post-comment-button:hover {
     background-color: #218838;
+}
+
+.post-comment-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
 
 /* Existing Comments Section Styling */

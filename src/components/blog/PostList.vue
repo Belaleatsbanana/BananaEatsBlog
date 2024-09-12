@@ -146,27 +146,41 @@ h3 {
 .grid-container {
     margin-top: 1rem;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 275px));
-    /* Reduced min size */
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    /* Adjusted min size to 1fr for equal spacing */
     gap: 10px 6px;
-    /* Reduced gap */
+    height: 100%;
+    /* Allow the container to stretch to full height */
 }
 
 .grid-item {
-    max-width: 300px;
+    max-width: 100%;
+    /* Let the grid items grow */
     min-height: 400px;
-    /* Further reduced height */
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
-    /* Further reduced gap */
     padding: 0.5rem;
-    /* Further reduced padding */
     border-radius: 3px;
-    /* Further reduced border-radius */
     background-color: var(--color-background-3);
     transition: transform 0.3s, box-shadow 0.3s;
     cursor: pointer;
+    flex-grow: 1;
+    /* Make the items stretchable */
+}
+
+.item-content {
+    font-size: 0.65rem;
+    line-height: 1.1;
+    margin: 0.7em 0;
+    display: -webkit-box;
+    line-clamp: 5;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    /* Let the content take up available space */
 }
 
 .grid-item:hover {
@@ -193,21 +207,6 @@ h3 {
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.item-content {
-    font-size: 0.65rem;
-    /* Further reduced font size */
-    line-height: 1.1;
-    margin: 0.7em 0;
-    display: -webkit-box;
-    line-clamp: 5;
-    -webkit-line-clamp: 5;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    /* Further reduced margin */
-    flex: 1;
 }
 
 .last-comment {

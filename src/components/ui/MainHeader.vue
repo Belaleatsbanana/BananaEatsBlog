@@ -63,10 +63,10 @@ const handleSearch = useDebounceFn(() => {
         </div>
 
         <div class="profile-section" @click="toggleDropdown">
-            <ProfileIcon />
+            <ProfileIcon width="25" height="25" />
             <span class="username">{{ userInfo.name }}</span>
-            <DownArrowIcon v-show="isDropdownVisible" />
-            <RightArrowIcon v-show="!isDropdownVisible" />
+            <DownArrowIcon v-show="isDropdownVisible" width="25" height="25" />
+            <RightArrowIcon v-show="!isDropdownVisible" width="25" height="25" />
 
             <div v-if="isDropdownVisible" class="dropdown-menu">
                 <ul>
@@ -155,6 +155,12 @@ const handleSearch = useDebounceFn(() => {
     /* Slightly reduced shadow */
 }
 
+.profile-section:hover svg,
+.profile-section:hover .username {
+    fill: var(--color-text-1);
+    color: var(--color-text-1);
+}
+
 .username {
     font-size: 0.875rem;
     /* Reduced font size */
@@ -171,7 +177,7 @@ const handleSearch = useDebounceFn(() => {
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     /* Slightly reduced shadow */
-    padding: 8px;
+    padding: 4px;
     /* Reduced padding */
     z-index: 100;
 }
@@ -190,6 +196,7 @@ const handleSearch = useDebounceFn(() => {
 .dropdown-menu li a {
     text-decoration: none;
     color: var(--color-text-1);
+    font-size: 0.875rem;
 }
 
 .dropdown-menu li a:hover {
