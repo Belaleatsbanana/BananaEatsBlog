@@ -9,115 +9,142 @@ const props = defineProps<{
     postSlug: string;
     posterId: number;
 }>();
+
+// Emit event for refreshing comments after actions
 const emits = defineEmits(['refresh-comments']);
 
-const showReplyForm = ref(false);
-const showReplies = ref(false);
-const replyContent = ref('');
+// Reactive variables for UI state
+const showReplyForm = ref(false);    // Show/hide reply form
+const showReplies = ref(false);      // Show/hide nested replies
+const replyContent = ref('');        // Holds content for the reply input
 
-// New state for managing the edit mode and edited content
-const isEditing = ref(false); // Toggle for edit mode
-const editedContent = ref(props.comment.content); // Holds the edited content
+// Edit mode state
+const isEditing = ref(false);        // Whether the comment is being edited
+const editedContent = ref(props.comment.content);  // Edited comment content
 
+// Fetch current user ID from localStorage
 const userId = parseInt(localStorage.getItem('userId') as string);
 
+// Check if the comment is editable or deletable by the current user
 const editableComment = props.comment.user.id === userId;
 const deletableComment = props.comment.user.id === userId || props.posterId === userId;
 
+// UI state for option dropdown visibility
 const isOptionDropdownVisible = ref(false);
 
+// States to show loading/spinner while saving comments/replies
 const savingComment = ref(false);
 const savingReply = ref(false);
 
-// Function to handle adding a reply (you can integrate API call here)
+/**
+ * Adds a reply to the comment.
+ * Calls the `createComment` API and refreshes the comment list upon success.
+ */
 const addReply = async () => {
     if (replyContent.value.trim()) {
-
-        savingReply.value = true; // Set loading state
+        savingReply.value = true;
 
         const newReply: CreateComment = {
             content: replyContent.value.trim(),
             parent_id: props.comment.id,
         };
 
-        createComment(props.postSlug, newReply).then(() => {
-
-            emits('refresh-comments'); // Emit event to refresh comments
-        }).catch((err) => {
-            console.log(err);
-        }).finally(() => {
-            showReplyForm.value = false; // Hide reply form
-            savingReply.value = false; // Reset loading state
-            replyContent.value = ''; // Clear reply content
-        });
+        createComment(props.postSlug, newReply)
+            .then(() => {
+                emits('refresh-comments');  // Emit event to refresh the comments
+            })
+            .catch((err) => {
+                console.error(err);
+            })
+            .finally(() => {
+                showReplyForm.value = false;   // Close the reply form
+                savingReply.value = false;     // Stop showing the loading spinner
+                replyContent.value = '';       // Clear the reply input
+            });
     }
 };
 
-// Function to handle editing the comment
+/**
+ * Saves the edited comment.
+ * Calls the `updateComment` API and refreshes the comment list upon success.
+ */
 const saveEditedComment = async () => {
     if (editedContent.value.trim()) {
-        
-        savingComment.value = true; // Set loading state
+        savingComment.value = true;
 
-        const EditedComment: UpdateComment = {
+        const updatedComment: UpdateComment = {
             id: props.comment.id,
             content: editedContent.value.trim(),
         };
 
-        updateComment(props.postSlug, EditedComment).then(() => {
-
-            emits('refresh-comments'); // Emit event to refresh comments
-        }).catch((err) => {
-            console.log(err);
-
-        }).finally(() => {
-            isEditing.value = false; // Exit edit mode
-            savingComment.value = false; // Reset loading state
-        });
+        updateComment(props.postSlug, updatedComment)
+            .then(() => {
+                emits('refresh-comments');  // Emit event to refresh the comments
+            })
+            .catch((err) => {
+                console.error(err);
+            })
+            .finally(() => {
+                isEditing.value = false;      // Exit edit mode
+                savingComment.value = false;  // Stop showing the loading spinner
+            });
     }
 };
 
+/**
+ * Deletes the comment.
+ * Calls the `deleteComment` API and refreshes the comment list upon success.
+ */
 const handleDeleteComment = () => {
-    
-    deleteComment(props.postSlug, props.comment.id).then(() => {
-        emits('refresh-comments'); // Emit event to refresh comments
-    }).catch((err) => {
-        console.log(err);
-    });
+    deleteComment(props.postSlug, props.comment.id)
+        .then(() => {
+            emits('refresh-comments');  // Emit event to refresh the comments
+        })
+        .catch((err) => {
+            console.error(err);
+        });
 };
 
-// Toggle replies visibility
+/**
+ * Toggles visibility of nested replies.
+ */
 const toggleReplies = () => {
     showReplies.value = !showReplies.value;
 };
 
-// Show/hide option dropdown
+/**
+ * Toggles the visibility of the option dropdown for edit/delete actions.
+ */
 const toggleOptionDropdown = () => {
     isOptionDropdownVisible.value = !isOptionDropdownVisible.value;
 };
 
-// Function to start editing the comment
+/**
+ * Activates edit mode and loads the current comment content into the editor.
+ */
 const startEditing = () => {
     isEditing.value = true;
-    editedContent.value = props.comment.content; // Load current content for editing
+    editedContent.value = props.comment.content;  // Load current content for editing
 };
 
-// Function to cancel editing
+/**
+ * Cancels edit mode and resets the content back to the original comment.
+ */
 const cancelEditing = () => {
     isEditing.value = false;
-    editedContent.value = props.comment.content; // Reset to original content
+    editedContent.value = props.comment.content;  // Reset to original content
 };
 </script>
 
 <template>
     <div class="comment-thread">
-        <!-- Display Comment Content or Edit Mode -->
+        <!-- Comment header with username and timestamp -->
         <div class="comment-header">
             <strong class="user-name">{{ comment.user.name }}</strong>
             <span class="created-at">&#x2022; {{ comment.created_at_readable }}</span>
         </div>
 
-        <!-- Check if we are in editing mode -->
+        <!-- Edit Mode: Show textarea if editing, otherwise show comment content -->
         <div v-if="isEditing" class="edit-comment-form">
             <textarea v-model="editedContent" rows="3"></textarea>
             <div class="edit-actions">
@@ -127,23 +154,21 @@ const cancelEditing = () => {
         </div>
         <p v-else class="comment-content">{{ comment.content }}</p>
 
-        <!-- Actions: Reply, Option Dropdown -->
+        <!-- Comment actions (reply, edit, delete) -->
         <div class="comment-actions">
-            <!-- Show/Hide Replies Button -->
+            <!-- Toggle to show/hide replies -->
             <button v-if="props.comment.children.length" class="reply-button" @click="toggleReplies">
                 {{ showReplies ? 'Hide' : 'Show more' }}
             </button>
 
-            <!-- Reply Button -->
+            <!-- Reply button -->
             <button class="reply-button" @click="showReplyForm = !showReplyForm">
                 {{ showReplyForm ? 'Cancel' : 'Reply' }}
             </button>
 
-            <!-- Option Icon Component -->
+            <!-- Options (edit/delete) dropdown -->
             <div class="option-container" @click="toggleOptionDropdown">
                 <OptionIcon v-if="deletableComment" />
-
-                <!-- Options Dropdown -->
                 <div v-if="isOptionDropdownVisible" class="comment-options">
                     <ul>
                         <li v-if="editableComment">
@@ -157,13 +182,13 @@ const cancelEditing = () => {
             </div>
         </div>
 
-        <!-- Reply Form (Toggled) -->
+        <!-- Reply form (toggleable) -->
         <div v-if="showReplyForm" class="reply-form">
             <textarea v-model="replyContent" placeholder="Write your reply..." rows="3"></textarea>
             <button class="post-reply-button" :disabled="savingReply" @click="addReply">Post Reply</button>
         </div>
 
-        <!-- Display Nested Replies -->
+        <!-- Nested replies -->
         <div v-if="comment.children.length && showReplies" class="replies">
             <CommentThread v-for="reply in comment.children" :key="reply.id" :comment="reply" :postSlug="props.postSlug"
                 :posterId="props.posterId" @refresh-comments="emits('refresh-comments')" />
@@ -172,19 +197,18 @@ const cancelEditing = () => {
 </template>
 
 <style scoped>
-/* General Styles for the Comment Thread */
+/* Container for each comment */
 .comment-thread {
     background-color: #f9f9f9;
     padding: 15px;
     border-bottom: 1px solid #ddd;
     border-radius: 8px;
     margin-bottom: 10px;
-    position: relative;
     max-width: 100%;
     box-sizing: border-box;
 }
 
-/* Header Section with User Name and Timestamp */
+/* Header (username and timestamp) */
 .comment-header {
     gap: 10px;
     display: flex;
@@ -202,65 +226,58 @@ const cancelEditing = () => {
     color: #999;
 }
 
-/* Comment Content */
+/* Comment content styling */
 .comment-content {
     font-size: 1rem;
     color: #444;
     margin-bottom: 10px;
 }
 
-/* Edit Mode Styles */
+/* Edit mode styles */
 .edit-comment-form {
     margin-bottom: 10px;
 }
 
-/* Edit actions styling */
 .edit-actions {
     margin-top: 8px;
 }
 
-/* Save and Cancel button styles */
-.save-button {
-    background-color: #28a745;
-    color: white;
+/* Buttons for save/cancel actions */
+.save-button,
+.cancel-button {
     padding: 6px 12px;
-    border: none;
     border-radius: 4px;
     cursor: pointer;
+    border: none;
+    color: white;
+}
+
+.save-button {
+    background-color: #28a745;
 }
 
 .save-button:disabled {
     background-color: #ccc;
-    cursor: not-allowed;
 }
 
 .cancel-button {
     background-color: #dc3545;
-    color: white;
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
     margin-left: 8px;
-    cursor: pointer;
 }
 
-/* Ensure textarea stays within container */
+/* Textarea styling */
 textarea {
     width: 100%;
-    /* Ensures the textarea takes 100% width of its parent */
     max-width: 100%;
-    /* Prevents overflow beyond parent container */
+    padding: 10px;
+    font-size: 1rem;
     border: 1px solid #ccc;
     border-radius: 4px;
     resize: none;
-    padding: 10px;
-    font-size: 1rem;
-    font-family: inherit;
     box-sizing: border-box;
-    /* Ensures padding is included in width calculation */
 }
 
-/* Comment Actions (Reply, Options) */
+/* Comment action buttons (reply, show replies) */
 .comment-actions {
     display: flex;
     align-items: center;
@@ -275,18 +292,15 @@ textarea {
     border-radius: 4px;
     cursor: pointer;
     margin-right: 10px;
-    transition: background-color 0.3s;
 }
 
 .reply-button:hover {
     background-color: #0056b3;
 }
 
-/* Option Icon */
+/* Options dropdown for edit/delete */
 .option-container {
     position: relative;
-    display: inline-block;
-    cursor: pointer;
 }
 
 .comment-options {

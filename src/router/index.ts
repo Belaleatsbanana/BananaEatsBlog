@@ -101,18 +101,18 @@ const router = createRouter({
   }
 })
 
-// router.beforeEach((to, from, next) => {
-//   const isAuthenticated = localStorage.getItem('BananaBlogToken')
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = localStorage.getItem('BananaBlogToken')
 
-//   if (to.meta.requiresAuth && !isAuthenticated) {
-//     localStorage.setItem('BananaBlogLastRoute', to.path)
-//     next({ name: ROUTES.LOGIN.name })
-//   } else if (!to.meta.requiresAuth && isAuthenticated) {
-//     next({ name: ROUTES.HOME.name })
-//   } else {
-//     next()
-//   }
-// })
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    localStorage.setItem('BananaBlogLastRoute', to.path)
+    next({ name: ROUTES.LOGIN.name })
+  } else if (!to.meta.requiresAuth && isAuthenticated) {
+    next({ name: ROUTES.HOME.name })
+  } else {
+    next()
+  }
+})
 
 
 export default router

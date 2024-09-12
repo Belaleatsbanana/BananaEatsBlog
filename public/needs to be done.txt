@@ -1,0 +1,20 @@
+add comments and clean the code:-
+
+CommentThread: done
+PostComments: x
+PostList: x
+
+CustomPopup: x
+MainHeader: x
+NavigationBar: x
+PaginationBar: x
+
+CreatePostPage: x
+EditPostPage: x
+HomePage: x
+LoginPage: x
+PostDetailPage: x
+RegisterPage: x
+SearchResultsPage: x
+
+App: x
