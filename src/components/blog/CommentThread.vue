@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineProps, defineEmits } from 'vue';
+import { ref } from 'vue';
 import type { Comment, CreateComment, UpdateComment } from '@/types';
 import OptionIcon from '../icons/OptionIcon.vue';
 import { createComment, deleteComment, updateComment } from '@/api/commentApi';
@@ -23,11 +23,11 @@ const isEditing = ref(false);        // Whether the comment is being edited
 const editedContent = ref(props.comment.content);  // Edited comment content
 
 // Fetch current user ID from localStorage
-const userId = parseInt(localStorage.getItem('userId') as string);
+const userId = parseInt(localStorage.getItem('BananaBlogUserId') as string);
 
 // Check if the comment is editable or deletable by the current user
-const editableComment = props.comment.user.id === userId;
-const deletableComment = props.comment.user.id === userId || props.posterId === userId;
+const editableComment = ref(props.comment.user.id === userId);
+const deletableComment = ref(props.comment.user.id === userId || props.posterId === userId);
 
 // UI state for option dropdown visibility
 const isOptionDropdownVisible = ref(false);
@@ -167,6 +167,7 @@ const cancelEditing = () => {
             </button>
 
             <!-- Options (edit/delete) dropdown -->
+            
             <div class="option-container" @click="toggleOptionDropdown">
                 <OptionIcon v-if="deletableComment" />
                 <div v-if="isOptionDropdownVisible" class="comment-options">
@@ -301,6 +302,15 @@ textarea {
 /* Options dropdown for edit/delete */
 .option-container {
     position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+}
+
+.option-container:hover {
+    background-color: var(--color-muted);
+
 }
 
 .comment-options {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineProps, defineEmits } from 'vue';
+import { ref } from 'vue';
 import CommentThread from './CommentThread.vue'; // Assuming CommentItem is a sibling component
 import type { Comment, CreateComment } from '@/types';
 import { createComment } from '@/api/commentApi';
