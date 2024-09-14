@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import router from '@/router';
 import { ROUTES } from '@/util/constants';
 import type { UserLogin } from '@/types';
 import { loginUser } from '@/api/userApi';
 import EyeOpenedIcon from '@/components/icons/EyeOpenedIcon.vue';
 import EyeClosedIcon from '@/components/icons/EyeClosedIcon.vue';
+
+// Inject the `triggerSnackbar` function from the App.vue
+const triggerSnackbar = inject('triggerSnackbar') as (message: string, success?: boolean) => void;
+
 
 const email = ref('');
 const password = ref('');
@@ -41,6 +45,8 @@ const handleLogin = () => {
         } else {
             router.push({ name: ROUTES.HOME.name });
         }
+
+        triggerSnackbar('Login successful', true);
 
     }).catch((err) => {
         if (err.response.status === 422) {

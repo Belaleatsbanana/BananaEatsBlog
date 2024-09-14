@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { ref, onUnmounted } from 'vue';
-import CustomPopup from '@/components/ui/CustomPopup.vue';
+import { ref, onUnmounted, inject } from 'vue';
 
 import defaultImage from "@/assets/images/Logo.png";
 import EditIcon from '@/components/icons/EditIcon.vue';
 import { createPost } from '@/api/postApi';
 import router from '@/router';
 import { ROUTES } from '@/util/constants';
+
+// Inject the `triggerSnackbar` function from the App.vue
+const triggerSnackbar = inject('triggerSnackbar') as (message: string, success?: boolean) => void;
 
 const defaultimg = ref<string>(defaultImage);
 const blogImage = ref<string>();
@@ -16,7 +18,6 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const newImageFile = ref<File | null>(null);
 
 const popupMessage = ref('');
-const visible = ref(false);
 
 const disableButton = ref(false);
 let objectUrl: string | null = null;
@@ -31,16 +32,20 @@ const createPostHandler = async () => {
 
     if (newImageFile.value) {
         formData.append('image', newImageFile.value);
+        console.log(formData.get('image'));
+
     }
 
     createPost(formData).then((response) => {
-        
+
         router.push({ name: ROUTES.POST.name, params: { slug: response } });
+        triggerSnackbar('Post created successfully', true);
 
     }).catch((err) => {
-        popupMessage.value = err.message;
-        visible.value = true;
+        popupMessage.value = err.response.data.message;
         disableButton.value = false;
+
+        triggerSnackbar(popupMessage.value, false);
 
     }).finally(() => {
         disableButton.value = false;
@@ -62,7 +67,8 @@ const handleFileUpload = (event: Event) => {
 
         if (!validImageTypes.includes(file.type)) {
             popupMessage.value = 'Invalid file type. Please select an image file.';
-            visible.value = true;
+
+            triggerSnackbar(popupMessage.value, false);
             return;
 
         }
@@ -75,6 +81,7 @@ const handleFileUpload = (event: Event) => {
         }
         objectUrl = blogImage.value;
 
+        triggerSnackbar('Image uploaded successfully', true);
     }
 };
 
@@ -126,8 +133,6 @@ onUnmounted(() => {
             </div> <!-- Form Submit Action -->
 
         </form>
-
-        <CustomPopup :message="popupMessage" :visible="visible" @update:visible="visible = $event" />
 
     </main>
 

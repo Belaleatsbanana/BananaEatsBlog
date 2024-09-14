@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import type { Comment, CreateComment, UpdateComment } from '@/types';
 import OptionIcon from '../icons/OptionIcon.vue';
 import { createComment, deleteComment, updateComment } from '@/api/commentApi';
+
+// Inject the `triggerSnackbar` function from the App.vue
+const triggerSnackbar = inject('triggerSnackbar') as (message: string, success?: boolean) => void;
+
 
 const props = defineProps<{
     comment: Comment;
@@ -52,9 +56,13 @@ const addReply = async () => {
         createComment(props.postSlug, newReply)
             .then(() => {
                 emits('refresh-comments');  // Emit event to refresh the comments
+
+                triggerSnackbar('Reply added successfully.', true);
             })
             .catch((err) => {
                 console.error(err);
+
+                triggerSnackbar('Failed to add reply. Please try again.', false);
             })
             .finally(() => {
                 showReplyForm.value = false;   // Close the reply form
@@ -80,9 +88,13 @@ const saveEditedComment = async () => {
         updateComment(props.postSlug, updatedComment)
             .then(() => {
                 emits('refresh-comments');  // Emit event to refresh the comments
+
+                triggerSnackbar('Comment updated successfully.', true);
             })
             .catch((err) => {
                 console.error(err);
+
+                triggerSnackbar('Failed to update comment. Please try again.', false);
             })
             .finally(() => {
                 isEditing.value = false;      // Exit edit mode
@@ -99,9 +111,13 @@ const handleDeleteComment = () => {
     deleteComment(props.postSlug, props.comment.id)
         .then(() => {
             emits('refresh-comments');  // Emit event to refresh the comments
+
+            triggerSnackbar('Comment deleted successfully.', true);
         })
         .catch((err) => {
             console.error(err);
+
+            triggerSnackbar('Failed to delete comment. Please try again.', false);
         });
 };
 
@@ -167,7 +183,7 @@ const cancelEditing = () => {
             </button>
 
             <!-- Options (edit/delete) dropdown -->
-            
+
             <div class="option-container" @click="toggleOptionDropdown">
                 <OptionIcon v-if="deletableComment" />
                 <div v-if="isOptionDropdownVisible" class="comment-options">

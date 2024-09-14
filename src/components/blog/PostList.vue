@@ -211,23 +211,28 @@ h3 {
 
 .last-comment {
     font-size: 0.65rem;
-    /* Further reduced font size */
     min-height: 70px;
-    /* Further reduced height */
     margin-top: 0.4em;
-    /* Further reduced margin */
     padding-top: 0.3em;
+    display: -webkit-box;
+    line-clamp: 3;
+    /* Set the number of lines to show */
+    -webkit-line-clamp: 3;
+    /* Limit the number of lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .last-comment-content {
     display: -webkit-box;
     line-clamp: 1;
+    /* Limit it to 1 line */
     -webkit-line-clamp: 1;
+    /* Limit to 1 line */
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    /* Further reduced line clamp */
-    font-size: 0.65rem;
 }
 
 .blog-footer {

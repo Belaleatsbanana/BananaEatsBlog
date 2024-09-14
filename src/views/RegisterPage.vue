@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import router from '@/router';
 import { ROUTES } from '@/util/constants';
 import type { UserRegister } from '@/types';
 import { registerUser } from '@/api/userApi';
 import EyeOpenedIcon from '@/components/icons/EyeOpenedIcon.vue';
 import EyeClosedIcon from '@/components/icons/EyeClosedIcon.vue';
+
+// Inject the `triggerSnackbar` function from the App.vue
+const triggerSnackbar = inject('triggerSnackbar') as (message: string, success?: boolean) => void;
+
 
 const name = ref('');
 const email = ref('');
@@ -53,6 +57,8 @@ const handleSignup = () => {
             } else {
                 router.push({ name: ROUTES.HOME.name });
             }
+
+            triggerSnackbar('Account created successfully', true);
         })
         .catch((err) => {
             if (err.response.status === 422) {

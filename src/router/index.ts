@@ -1,20 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import TestEgypt from '@/views/TestEgypt.vue'
 import { ROUTES } from '@/util/constants'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    {
-      path: '/test',
-      name: 'test',
-      component: TestEgypt,
-      meta: {
-        requiresAuth: false,
-        showNavbar: true,
-        showMainHeader: true
-      }
-    },
     {
       path: ROUTES.LANDING.path,
       name: ROUTES.LANDING.name,

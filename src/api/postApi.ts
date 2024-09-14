@@ -35,6 +35,8 @@ export const getPost = async (slug: string): Promise<PostDetail> => {
 
 export const createPost = async (formData: FormData): Promise<string> => {
   try {
+    console.log('formData:', formData.get('image'));
+    
     const response = await api.post('/posts', formData)
     const slug: string = response.data.data.slug
 

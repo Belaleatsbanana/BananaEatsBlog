@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, inject } from 'vue';
 import { useRoute } from 'vue-router';
 import router from '@/router';
 import BlogComments from '@/components/blog/PostComments.vue';
@@ -12,6 +12,10 @@ import type { PostDetail } from '@/types';
 import { deletePost, getPost } from '@/api/postApi';
 import { ROUTES } from '@/util/constants';
 import { handleLikeClick } from '@/api/likeApi';
+
+// Inject the `triggerSnackbar` function from the App.vue
+const triggerSnackbar = inject('triggerSnackbar') as (message: string, success?: boolean) => void;
+
 
 const imgSrc = ref<string>(defaultImage);
 const route = useRoute();
@@ -37,6 +41,7 @@ onMounted(() => {
 
     }).catch((err) => {
         console.log(err);
+        triggerSnackbar(err.response.data.message, false);
 
     });
 });
@@ -50,18 +55,18 @@ const deleteBlog = async () => {
 
         deletePost(slug.value).then(() => {
             popupMessage.value = 'Post deleted successfully.';
-            popupVisible.value = true;
 
             router.push({ name: ROUTES.HOME.name });
+            triggerSnackbar(popupMessage.value, true);
 
-        }).catch(() => {
-            popupMessage.value = "An error occurred. Please try again.";
-            popupVisible.value = true;
+        }).catch((err) => {
+            popupMessage.value = err.response.data.message;
+            triggerSnackbar(popupMessage.value, false);
 
         })
     } else {
         popupMessage.value = 'Post does not exist!';
-        popupVisible.value = true;
+        triggerSnackbar(popupMessage.value, false);
     }
 };
 
@@ -72,7 +77,8 @@ const toggleLikeBlog = () => {
 
     if (!blogPost.value) {
         popupMessage.value = 'Post does not exist!';
-        popupVisible.value = true;
+
+        triggerSnackbar(popupMessage.value, false);
         return;
     }
 
@@ -98,9 +104,9 @@ const toggleLikeBlog = () => {
             })
             .catch(() => {
                 // Revert changes if API call fails
-                    blogPost.value!.liked_by_user = !blogPost.value!.liked_by_user;
-                    blogPost.value!.likes_count += blogPost.value!.liked_by_user ? -1 : 1;
-                
+                blogPost.value!.liked_by_user = !blogPost.value!.liked_by_user;
+                blogPost.value!.likes_count += blogPost.value!.liked_by_user ? -1 : 1;
+
             });
     }, 1000); // Adjust the delay time to match your animation duration
 };
@@ -130,6 +136,7 @@ const refreshComments = () => {
 
     }).catch((err) => {
         console.log(err);
+        triggerSnackbar(err.response.data.message, false);
 
     });
 };
@@ -157,8 +164,7 @@ const refreshComments = () => {
                         <div class="blog-like" @click="openLikes">
 
                             <HeartIcon :fillColor="blogPost.liked_by_user ? 'red' : 'white'"
-                                :strokeColor="blogPost.liked_by_user ? 'red' : 'black'"
-                                @click.stop="toggleLikeBlog"
+                                :strokeColor="blogPost.liked_by_user ? 'red' : 'black'" @click.stop="toggleLikeBlog"
                                 :class="likeAction === 'liking' && likeAnimation === blogPost.slug ? 'liking' : likeAction === 'unliking' && likeAnimation === blogPost.slug ? 'unliking' : ''"
                                 class="heart-icon" />
                             <span>{{ blogPost.likes_count }} Likes</span>
@@ -198,9 +204,8 @@ const refreshComments = () => {
     </main>
     <footer>
 
-        <BlogComments v-if="blogPost" :comments="blogPost.comments" :postSlug="slug"
-        :poster-id="blogPost.user.id"
-        @refresh-comments="refreshComments"/>
+        <BlogComments v-if="blogPost" :comments="blogPost.comments" :postSlug="slug" :poster-id="blogPost.user.id"
+            @refresh-comments="refreshComments" />
 
     </footer>
     <CustomPopup v-if="blogPost" :visible="likePopupVisible || popupVisible" :message="likeHeaderMessage"

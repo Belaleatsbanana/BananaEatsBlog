@@ -7,26 +7,28 @@ export const api = axios.create({
 // Add a request interceptor to set the Authorization and Content-Type header dynamically
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('BananaBlogToken')
-
+    const token = localStorage.getItem('BananaBlogToken');
+    
     // Set Authorization header if the token exists
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = `Bearer ${token}`;
     } else {
-      delete config.headers.Authorization // Remove the Authorization header if no token
+      delete config.headers.Authorization; // Remove the Authorization header if no token
     }
 
-    // Check if the request is for file upload
-    if (config.headers['Content-Type'] === 'multipart/form-data') {
-      config.headers['Content-Type'] = 'multipart/form-data'
+    // Remove Content-Type setting for FormData requests
+    if (config.data instanceof FormData) {
+      // Let Axios handle 'multipart/form-data' and boundary
+      delete config.headers['Content-Type'];
     } else {
-      // Reset or explicitly set to JSON for all other cases
-      config.headers['Content-Type'] = 'application/json'
+      // Set Content-Type to JSON for other request types
+      config.headers['Content-Type'] = 'application/json';
     }
 
-    return config
+    return config;
   },
   (error) => {
-    return Promise.reject(error)
+    return Promise.reject(error);
   }
-)
+);
+

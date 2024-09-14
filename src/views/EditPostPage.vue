@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref, onUnmounted, onMounted } from 'vue';
+import { ref, onUnmounted, onMounted, inject } from 'vue';
 import DeleteIcon from '@/components/icons/DeleteIcon.vue';
-import CustomPopup from '@/components/ui/CustomPopup.vue';
 
 import defaultImage from "@/assets/images/Logo.png";
 import EditIcon from '@/components/icons/EditIcon.vue';
@@ -9,6 +8,10 @@ import { useRoute } from 'vue-router';
 import { deletePost, getPost, updatePost } from '@/api/postApi';
 import { ROUTES } from '@/util/constants';
 import router from '@/router';
+
+// Inject the `triggerSnackbar` function from the App.vue
+const triggerSnackbar = inject('triggerSnackbar') as (message: string, success?: boolean) => void;
+
 
 const route = useRoute();
 
@@ -21,7 +24,6 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const newImageFile = ref<File | null>(null);
 
 const popupMessage = ref('');
-const popupVisible = ref(false);
 
 const disableButton = ref(false);
 let objectUrl: string | null = null;
@@ -36,6 +38,7 @@ onMounted(() => {
 
     }).catch((err) => {
         console.log(err);
+        triggerSnackbar(err.response.data.message, false);
 
     });
 });
@@ -55,46 +58,46 @@ const updatePostHandler = async () => {
     if (slug.value) {
         updatePost((slug.value as string), formData).then(() => {
             popupMessage.value = 'Post updated successfully.';
-            popupVisible.value = true;
 
             router.push({ name: ROUTES.POST.name, params: { slug: slug.value } });
+            triggerSnackbar(popupMessage.value, true);
 
-        }).catch(() => {
-            popupMessage.value = "An error occurred. Please try again.";
-            popupVisible.value = true;
+        }).catch((err) => {
+            popupMessage.value = err.response.data.message;
+            triggerSnackbar(popupMessage.value, false);
 
         }).finally(() => {
             disableButton.value = false;
         });
-    }else {
+    } else {
         popupMessage.value = 'Post does not exist!';
-        popupVisible.value = true;
+        triggerSnackbar(popupMessage.value, false);
     }
 };
 
 
 const deletePostHandler = () => {
-    
+
     disableButton.value = true;
 
     if (slug.value) {
 
         deletePost(slug.value).then(() => {
             popupMessage.value = 'Post deleted successfully.';
-            popupVisible.value = true;
 
+            triggerSnackbar(popupMessage.value, true);
             router.push({ name: ROUTES.HOME.name });
 
-        }).catch(() => {
-            popupMessage.value = "An error occurred. Please try again.";
-            popupVisible.value = true;
+        }).catch((err) => {
+            popupMessage.value = err.response.data.message;
+            triggerSnackbar(popupMessage.value, false);
 
         }).finally(() => {
             disableButton.value = false;
         });
-    }else {
+    } else {
         popupMessage.value = 'Post does not exist!';
-        popupVisible.value = true;
+        triggerSnackbar(popupMessage.value, false);
     }
 
 };
@@ -112,7 +115,7 @@ const handleFileUpload = (event: Event) => {
 
         if (!validImageTypes.includes(file.type)) {
             popupMessage.value = 'Invalid file type. Please select an image file.';
-            popupVisible.value = true;
+            triggerSnackbar(popupMessage.value, false);
             return;
 
         }
@@ -125,6 +128,8 @@ const handleFileUpload = (event: Event) => {
             URL.revokeObjectURL(objectUrl);
         }
         objectUrl = blogImage.value; // Store the new object URL for later cleanup
+
+        triggerSnackbar('Image uploaded successfully', true);
     }
 };
 
@@ -185,8 +190,6 @@ onUnmounted(() => {
             </div> <!-- Form Submit Button -->
 
         </form>
-
-        <CustomPopup :message="popupMessage" :visible="popupVisible" @update:visible="popupVisible = $event" />
 
     </main>
 

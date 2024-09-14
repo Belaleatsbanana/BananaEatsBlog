@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import CommentThread from './CommentThread.vue'; // Assuming CommentItem is a sibling component
 import type { Comment, CreateComment } from '@/types';
 import { createComment } from '@/api/commentApi';
+
+// Inject the `triggerSnackbar` function from the App.vue
+const triggerSnackbar = inject('triggerSnackbar') as (message: string, success?: boolean) => void;
+
 
 const props = defineProps<{
     comments: Comment[];
@@ -12,7 +16,7 @@ const props = defineProps<{
 
 const emits = defineEmits(['refresh-comments']);
 
-const newComment = ref<CreateComment>({ content: '' , parent_id: null});
+const newComment = ref<CreateComment>({ content: '', parent_id: null });
 const postingComment = ref(false);
 
 const addComment = () => {
@@ -23,8 +27,12 @@ const addComment = () => {
             newComment.value.content = '';
             emits('refresh-comments');
 
+            triggerSnackbar('Comment added successfully.', true);
+
         }).catch((error) => {
             console.error('Error adding comment:', error);
+
+            triggerSnackbar('Failed to add comment. Please try again.', false);
         }).finally(() => {
             postingComment.value = false;
         });

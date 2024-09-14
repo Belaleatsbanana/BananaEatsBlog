@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, provide, ref } from 'vue';
 import MainHeader from './components/ui/MainHeader.vue';
 import NavigationBar from './components/ui/NavigationBar.vue';
 import { useRoute } from 'vue-router';
+import SnackBar from './components/ui/SnackBar.vue';
 
 const router = useRoute();
 
 const showNavbar = computed(() => router.meta.showNavbar);
 const showHeader = computed(() => router.meta.showMainHeader);
 
-
-// Compute dynamic classes based on the visibility of the header and navbar
 const mainContentClasses = computed(() => {
   return {
     'with-header': showHeader.value,
@@ -18,12 +17,36 @@ const mainContentClasses = computed(() => {
   };
 });
 
+// Manage multiple snackbars
+const snackbars = ref<{ id: number; message: string; success: boolean }[]>([]);
+let snackbarId = 0;
+
+const triggerSnackbar = (message: string, success: boolean = false) => {
+  snackbars.value.push({ id: ++snackbarId, message, success });
+  setTimeout(() => {
+    snackbars.value.shift(); // Remove the first snackbar
+  }, 3000); // Adjust timeout as needed
+};
+
+const hideSnackbar = (id: number) => {
+  snackbars.value = snackbars.value.filter(snackbar => snackbar.id !== id);
+};
+
+// Provide the `triggerSnackbar` function to child components
+provide('triggerSnackbar', triggerSnackbar);
 </script>
+
 
 <template>
   <!-- Header Component -->
   <header v-if="showHeader" class="app-header">
     <MainHeader />
+
+    <!-- SnackBars -->
+    <div v-for="snackbar in snackbars" :key="snackbar.id">
+      <SnackBar :message="snackbar.message" :visible="true" :success="snackbar.success"
+        @hide="() => hideSnackbar(snackbar.id)" />
+    </div>
   </header>
 
   <!-- Navigation Bar Component -->
@@ -58,7 +81,6 @@ const mainContentClasses = computed(() => {
 nav {
   position: fixed;
   top: 45px;
-  /* Below the header */
   left: 0;
   z-index: 10;
 }
@@ -66,20 +88,14 @@ nav {
 /* Main content base styles */
 .main-content {
   min-height: 100vh;
-  /* Set base height */
   box-sizing: border-box;
-  /* Ensure padding is included in height calculation */
 }
 
-/* Adjust the main content to avoid overlapping with header and navbar */
 .with-header {
   margin-top: 45px;
-  /* Adjust based on the header height */
 }
 
 .with-navbar {
   margin-left: 160px;
-  /* Adjust based on the navbar width */
 }
 </style>
-
