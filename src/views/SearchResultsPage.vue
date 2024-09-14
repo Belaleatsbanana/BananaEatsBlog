@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { inject, onMounted, ref } from 'vue';
 import { onBeforeRouteUpdate, useRoute } from 'vue-router';
 import PostList from '@/components/blog/PostList.vue';
 import PaginationBar from '@/components/ui/PaginationBar.vue';
 import type { Post, PostListResponse } from '@/types';
 import { getPostList } from '@/api/postApi';
+
+// Inject the `triggerSnackbar` function from the App.vue
+const triggerSnackbar = inject('triggerSnackbar') as (message: string, success?: boolean) => void;
+
 
 const ApiResponse = ref<PostListResponse>();
 const Posts = ref<Post[]>([]);
@@ -18,45 +22,35 @@ onMounted(() => {
 
     query.value = route.query.q as string;
 
-    fetchPosts();
+    fetchPosts(currentPageNumber.value, selectedSort.value, query.value);
 });
 
-const fetchPosts = () => {
+const fetchPosts = (page: number, sort: 'desc' | 'asc', search: string) => {
 
-    getPostList(currentPageNumber.value, selectedSort.value, query.value).then((response) => {
+    getPostList(page, sort, search).then((response) => {
         ApiResponse.value = response;
         Posts.value = response.data;
     })
         .catch((error) => {
             console.error(error);
+
+            triggerSnackbar('Error fetching posts', false);
         });
+
+    window.scrollTo(0, 0);
 };
 
 const onSortChange = () => {
 
-    getPostList(currentPageNumber.value, selectedSort.value, query.value).then((response) => {
-        ApiResponse.value = response;
-        Posts.value = response.data;
-    })
-        .catch((error) => {
-            console.error(error);
-        });
+
+    fetchPosts(currentPageNumber.value, selectedSort.value, query.value);
 };
 
 const setPageChange = (pageUrl: string) => {
 
     currentPageNumber.value = parseInt(pageUrl[pageUrl.length - 1]);
 
-    getPostList(currentPageNumber.value, selectedSort.value, query.value).then((response) => {
-        ApiResponse.value = response;
-        Posts.value = response.data;
-
-        // scroll to top of the page after page change
-        window.scrollTo(0, 0);
-    })
-        .catch((error) => {
-            console.error(error);
-        });
+    fetchPosts(currentPageNumber.value, selectedSort.value, query.value);
 
 };
 
@@ -66,7 +60,7 @@ onBeforeRouteUpdate((to, from, next) => {
     if (newQuery !== from.query.q) {
         query.value = newQuery as string;
         currentPageNumber.value = 1;
-        fetchPosts();
+        fetchPosts(currentPageNumber.value, selectedSort.value, query.value);
     }
     next();
 });

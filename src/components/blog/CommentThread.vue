@@ -56,6 +56,7 @@ const addReply = async () => {
         createComment(props.postSlug, newReply)
             .then(() => {
                 emits('refresh-comments');  // Emit event to refresh the comments
+                showReplies.value = true;   // Show the replies after adding a new one
 
                 triggerSnackbar('Reply added successfully.', true);
             })

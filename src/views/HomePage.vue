@@ -3,7 +3,11 @@ import { getPostList } from '@/api/postApi';
 import PostList from '@/components/blog/PostList.vue';
 import PaginationBar from '@/components/ui/PaginationBar.vue';
 import type { Post, PostListResponse } from '@/types';
-import { onMounted, ref } from 'vue';
+import { inject, onMounted, ref } from 'vue';
+
+// Inject the `triggerSnackbar` function from the App.vue
+const triggerSnackbar = inject('triggerSnackbar') as (message: string, success?: boolean) => void;
+
 
 const ApiResponse = ref<PostListResponse>();
 const Posts = ref<Post[]>([]);
@@ -12,41 +16,36 @@ const currentPageNumber = ref<number>(1);
 
 onMounted(() => {
 
-    getPostList(1, selectedSort.value).then((response) => {
+    fetchPosts(currentPageNumber.value, selectedSort.value);
+});
+
+const fetchPosts = (page: number, sort: 'desc' | 'asc') => {
+
+    getPostList(page, sort).then((response) => {
         ApiResponse.value = response;
         Posts.value = response.data;
+
+        // scroll to top of the page
+        window.scrollTo(0, 0);
+
     })
         .catch((error) => {
             console.error(error);
+            triggerSnackbar('Error fetching posts', false);
         });
-});
+};
 
 
 const onSortChange = () => {
 
-    getPostList(currentPageNumber.value, selectedSort.value).then((response) => {
-        ApiResponse.value = response;
-        Posts.value = response.data;
-    })
-        .catch((error) => {
-            console.error(error);
-        });
+    fetchPosts(currentPageNumber.value, selectedSort.value);
 };
 
 const setPageChange = (pageUrl: string) => {
-    
-    currentPageNumber.value = parseInt(pageUrl[pageUrl.length - 1]);
-    
-    getPostList(currentPageNumber.value, selectedSort.value).then((response) => {
-        ApiResponse.value = response;
-        Posts.value = response.data;
 
-        // scroll to top of the page after page change
-        window.scrollTo(0, 0);
-    })
-        .catch((error) => {
-            console.error(error);
-        });
+    currentPageNumber.value = parseInt(pageUrl[pageUrl.length - 1]);
+
+    fetchPosts(currentPageNumber.value, selectedSort.value);
 
 };
 

@@ -115,6 +115,17 @@ const toggleLikeBlog = () => {
 
 // do this now
 const openLikes = () => {
+
+    getPost(slug.value).then((result) => {
+        blogPost.value = result;
+        isBlogPoster.value = result.user.id === userId;
+
+    }).catch((err) => {
+        console.log(err);
+        triggerSnackbar(err.response.data.message, false);
+
+    });
+
     const likes = blogPost.value!.likes;
 
     if (likes.length) {
