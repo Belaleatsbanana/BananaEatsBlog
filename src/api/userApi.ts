@@ -16,7 +16,7 @@ export const getUser = async (): Promise<User> => {
   }
 }
 
-export const registerUser = async (userData: UserRegister): Promise<User> => {
+export const registerUser = async (userData: UserRegister): Promise<void> => {
   try {
     const response = await api.post('/register', userData)
     const authResponse: AuthSuccessResponse = response.data
@@ -24,8 +24,6 @@ export const registerUser = async (userData: UserRegister): Promise<User> => {
     // Store the token in localStorage
     localStorage.setItem('BananaBlogToken', authResponse.token)
 
-    // Fetch and return the user after successful registration
-    return getUser()
   } catch (error) {
     console.error('Registration failed:', error)
     throw error
