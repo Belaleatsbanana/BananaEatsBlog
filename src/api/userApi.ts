@@ -32,16 +32,13 @@ export const registerUser = async (userData: UserRegister): Promise<User> => {
   }
 }
 
-export const loginUser = async (userData: UserLogin): Promise<User> => {
+export const loginUser = async (userData: UserLogin): Promise<void> => {
   try {
     const response = await api.post('/login', userData)
     const authResponse: AuthSuccessResponse = response.data
 
     // Store the token in localStorage
     localStorage.setItem('BananaBlogToken', authResponse.token)
-
-    // Fetch and return the user after successful login
-    return getUser()
   } catch (error) {
     console.error('Login failed:', error)
     throw error
