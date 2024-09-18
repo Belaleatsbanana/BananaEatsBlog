@@ -83,6 +83,26 @@ const router = createRouter({
         showNavbar: true,
         showMainHeader: true
       }
+    },
+    {
+      path: `${ROUTES.MY_POSTS.path}`,
+      name: ROUTES.MY_POSTS.name,
+      component: ROUTES.MY_POSTS.component,
+      meta: {
+        requiresAuth: true,
+        showNavbar: true,
+        showMainHeader: true
+      }
+    },
+    {
+      path: `${ROUTES.MY_COMMENTS.path}`,
+      name: ROUTES.MY_COMMENTS.name,
+      component: ROUTES.MY_COMMENTS.component,
+      meta: {
+        requiresAuth: true,
+        showNavbar: true,
+        showMainHeader: true
+      }
     }
   ],
   scrollBehavior() {

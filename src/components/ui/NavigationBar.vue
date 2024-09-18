@@ -6,8 +6,8 @@ import MyPostsIcon from '../icons/MyPostsIcon.vue';
 import CommentsIcon from '../icons/CommentsIcon.vue';
 import { ROUTES } from '@/util/constants';
 
-const isMyPostsDisabled = ref(true);
-const isCommentsDisabled = ref(true);
+const isMyPostsDisabled = ref(false);
+const isCommentsDisabled = ref(false);
 </script>
 
 <template>
@@ -34,7 +34,7 @@ const isCommentsDisabled = ref(true);
 
                     <!-- My Posts Link (conditionally enabled/disabled) -->
                     <li>
-                        <router-link v-if="!isMyPostsDisabled" to="/">
+                        <router-link v-if="!isMyPostsDisabled" :to="{ name: ROUTES.MY_POSTS.name }">
                             <MyPostsIcon class="icon" height="18px" width="18px" />
                             <span>My Posts</span>
                         </router-link>
@@ -46,7 +46,7 @@ const isCommentsDisabled = ref(true);
 
                     <!-- Comments Link (conditionally enabled/disabled) -->
                     <li>
-                        <router-link v-if="!isCommentsDisabled" to="/">
+                        <router-link v-if="!isCommentsDisabled" :to="{ name: ROUTES.MY_COMMENTS.name }">
                             <CommentsIcon class="icon" height="18px" width="18px" />
                             <span>Comments</span>
                         </router-link>
@@ -127,7 +127,7 @@ const isCommentsDisabled = ref(true);
 
 /* Hover effect for links */
 .column-bar li:hover a,
- .column-bar li .router-link-exact-active {
+.column-bar li .router-link-exact-active {
     background-color: var(--color-background-2);
     color: var(--color-text-2);
 }

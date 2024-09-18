@@ -53,5 +53,15 @@ export const ROUTES = {
     path: '/edit-post',
     name: 'EditPostPage',
     component: () => import('@/views/EditPostPage.vue')
+  },
+  MY_POSTS: {
+    path: '/my-posts',
+    name: 'MyPostsPage',
+    component: () => import('@/views/MyPostPage.vue')
+  },
+  MY_COMMENTS: {
+    path: '/my-comments',
+    name: 'MyCommentsPage',
+    component: () => import('@/views/MyCommentPage.vue')
   }
 }

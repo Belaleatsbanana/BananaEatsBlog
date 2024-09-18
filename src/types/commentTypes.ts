@@ -1,3 +1,5 @@
+import type { MetaData, PaginationLinks } from './postResponseTypes'
+import type { Post } from './postTypes'
 import type { UserBasicInfo } from './userTypes'
 
 // Base Comment type
@@ -23,4 +25,16 @@ export type CreateComment = {
 export type UpdateComment = {
   id: number
   content: string
+}
+
+// Type that accepts id, content, created_at, created_at_readable, children, and post
+export type ExtendedComment = Comment & {
+  post: Post
+}
+
+// Type for my comments response
+export type MyCommentsResponse = {
+  data: ExtendedComment[]
+  links: PaginationLinks
+  meta: MetaData
 }

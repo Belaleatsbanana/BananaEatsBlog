@@ -4,17 +4,21 @@ import { api } from './baseApi'
 export const getPostList = async (
   page: number = 1,
   sort: 'asc' | 'desc' = 'desc',
-  search: string = ''
+  search: string = '',
+  user_id: string = ''
 ): Promise<PostListResponse> => {
   try {
     const response = await api.get('/posts', {
       params: {
         page,
         sort,
-        search
+        search,
+        user_id,
       }
     })
     const postListResponse: PostListResponse = response.data
+
+    
     return postListResponse
   } catch (error) {
     console.error('Failed to fetch posts:', error)

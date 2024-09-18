@@ -14,7 +14,7 @@ const props = defineProps<{
 }>();
 
 const imgSrc = ref<string>(defaultImage);
-const userId = parseInt(localStorage.getItem("userId") as string);
+const userId = parseInt(localStorage.getItem("BananaBlogUserId") as string);
 
 const likeAnimation = ref<string | null>(null);
 const likeAction = ref<string | null>(null);

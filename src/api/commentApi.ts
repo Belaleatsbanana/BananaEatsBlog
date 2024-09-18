@@ -1,5 +1,27 @@
-import type { CreateComment, UpdateComment } from '@/types'
+import type { CreateComment, MyCommentsResponse, UpdateComment } from '@/types'
 import { api } from './baseApi'
+
+export const getMyComments = async (
+  page: string = "1",
+  sort: 'asc' | 'desc' = 'desc'
+): Promise<MyCommentsResponse> => {
+  try {
+    const response = await api.get('/user/comments',
+      {
+        params: {
+          page,
+          sort,
+        }
+      }
+    )
+    const myCommentsResponse: MyCommentsResponse = response.data
+
+    return myCommentsResponse
+  } catch (error) {
+    console.error('Failed to get my comments:', error)
+    throw error
+  }
+}
 
 export const createComment = async (slug: string, comment: CreateComment) => {
   try {
